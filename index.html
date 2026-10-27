@@ -49,10 +49,18 @@
         .navbar-brand {
             color: var(--gold-light) !important;
             font-weight: 700;
-            letter-spacing: 1px;
-            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            font-size: 0.95rem; /* Ukuran pas untuk HP & Desktop */
             display: flex;
             align-items: center;
+            white-space: normal !important; /* Membuat teks bisa turun ke baris baru jika mentok */
+            line-height: 1.2;
+        }
+
+        @media (min-width: 768px) {
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
         }
 
         /* Icon Huruf China dengan Background Hijau */
@@ -60,6 +68,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            min-width: 36px;
             width: 36px;
             height: 36px;
             background-color: var(--emerald-main);
@@ -120,6 +129,14 @@
         .bg-success { background-color: #059669 !important; }
         .bg-danger { background-color: #991b1b !important; }
 
+        /* Filter Box Custom Tema Hijau */
+        .filter-box-emerald {
+            background-color: var(--emerald-light);
+            border: 1px solid #a7f3d0;
+            border-radius: 0.5rem;
+            padding: 10px 15px;
+        }
+
         /* Responsive Mobile Cards Styling */
         @media (max-width: 768px) {
             .desktop-table { display: none; }
@@ -152,16 +169,16 @@
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg shadow-sm">
+    <nav class="navbar navbar-expand-lg shadow-sm py-2">
         <div class="container">
-            <a class="navbar-brand" href="#">
-                <span class="chinese-logo-icon me-2">劉</span> 
+            <a class="navbar-brand me-2" href="#">
+                <span class="chinese-logo-icon me-2 flex-shrink-0">劉</span> 
                 <span>SEWA LAPANGAN SEPAK BOLA LIU - SHIZU SOCIETY</span>
             </a>
-            <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler bg-light ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <div class="collapse navbar-collapse justify-content-end mt-2 mt-lg-0" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link active" href="#" onclick="switchTab('home', event)"><i class="fa-solid fa-scroll me-1"></i> Data Sewa</a>
@@ -244,22 +261,35 @@
                 </div>
             </div>
 
+            <!-- Panel Filter & Kontrol Tabel -->
+            <div class="card p-3 mb-3 filter-box-emerald">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-7 col-12">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="fw-semibold text-success small"><i class="fa-solid fa-filter me-1"></i> Rentang Tanggal:</span>
+                            <input type="date" id="filterDari" class="form-control form-control-sm w-auto bg-white" onchange="renderTabel()">
+                            <span class="small text-muted">s.d</span>
+                            <input type="date" id="filterSampai" class="form-control form-control-sm w-auto bg-white" onchange="renderTabel()">
+                            <button class="btn btn-sm btn-outline-success bg-white" type="button" onclick="resetFilter()" title="Reset Filter"><i class="fa-solid fa-rotate-right me-1"></i> Reset</button>
+                        </div>
+                    </div>
+                    <div class="col-md-5 col-12">
+                        <div class="d-flex align-items-center justify-content-md-end gap-2">
+                            <span class="fw-semibold text-success small"><i class="fa-solid fa-arrow-sort me-1"></i> Urutkan:</span>
+                            <select id="sortUrutan" class="form-select form-select-sm w-auto bg-white" onchange="renderTabel()">
+                                <option value="asc">Terlama / Terkecil</option>
+                                <option value="desc">Terbaru / Terbesar</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Daftar Data -->
             <div class="card p-3">
-                <div class="d-flex flex-column flex-xxl-row justify-content-between align-items-xxl-center gap-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="text-secondary m-0 fs-5"><i class="fa-solid fa-table-list me-2"></i>Daftar Penyewa Lapangan</h4>
-                    
-                    <!-- Kotak Filter Rentang Tanggal & Refresh -->
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <div class="d-flex align-items-center gap-1 bg-light p-1 rounded border">
-                            <span class="small text-muted px-1">Dari:</span>
-                            <input type="date" id="filterDari" class="form-control form-control-sm border-0 bg-transparent" onchange="renderTabel()">
-                            <span class="small text-muted px-1">s.d:</span>
-                            <input type="date" id="filterSampai" class="form-control form-control-sm border-0 bg-transparent" onchange="renderTabel()">
-                            <button class="btn btn-sm btn-outline-danger border-0" type="button" onclick="resetFilter()" title="Reset Filter"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                        <button class="btn btn-sm btn-outline-primary" onclick="loadDataFromCloud()"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
-                    </div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadDataFromCloud()"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
                 </div>
 
                 <!-- TAMPILAN DESKTOP (TABEL BIASA) -->
@@ -390,7 +420,7 @@
 
         async function loadDataFromCloud() {
             document.getElementById('loadingIndicator').classList.remove('d-none');
-            const { data, error } = await _supabase.from('sewa_lapangan').select('*').order('tanggal_sewa', { ascending: true });
+            const { data, error } = await _supabase.from('sewa_lapangan').select('*');
             document.getElementById('loadingIndicator').classList.add('d-none');
 
             if (error) {
@@ -454,23 +484,30 @@
             const mobileContainer = document.getElementById('mobileSewaContainer');
             const dariVal = document.getElementById('filterDari').value;
             const sampaiVal = document.getElementById('filterSampai').value;
+            const sortVal = document.getElementById('sortUrutan').value;
             
             tbody.innerHTML = '';
             mobileContainer.innerHTML = '';
 
-            // Filter data berdasarkan rentang tanggal
-            let filteredData = dataSewa;
-            if (dariVal && sampaiVal) {
-                filteredData = dataSewa.filter(item => item.tanggal_sewa >= dariVal && item.tanggal_sewa <= sampaiVal);
-            } else if (dariVal) {
-                filteredData = dataSewa.filter(item => item.tanggal_sewa >= dariVal);
-            } else if (sampaiVal) {
-                filteredData = dataSewa.filter(item => item.tanggal_sewa <= sampaiVal);
-            }
+            let filteredData = dataSewa.filter(item => {
+                if (dariVal && sampaiVal) return item.tanggal_sewa >= dariVal && item.tanggal_sewa <= sampaiVal;
+                if (dariVal) return item.tanggal_sewa >= dariVal;
+                if (sampaiVal) return item.tanggal_sewa <= sampaiVal;
+                return true;
+            });
+
+            filteredData.sort((a, b) => {
+                let dateA = new Date(a.tanggal_sewa);
+                let dateB = new Date(b.tanggal_sewa);
+                if (dateA.getTime() === dateB.getTime()) {
+                    return sortVal === 'asc' ? a.id - b.id : b.id - a.id;
+                }
+                return sortVal === 'asc' ? dateA - dateB : dateB - dateA;
+            });
 
             if (filteredData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-muted">Tidak ada data sewa untuk rentang tanggal tersebut.</td></tr>`;
-                mobileContainer.innerHTML = `<div class="text-center py-3 text-muted">Tidak ada data sewa untuk rentang tanggal tersebut.</div>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-muted">Tidak ada data sewa yang sesuai.</td></tr>`;
+                mobileContainer.innerHTML = `<div class="text-center py-3 text-muted">Tidak ada data sewa yang sesuai.</div>`;
                 return;
             }
 
@@ -479,7 +516,6 @@
                 const clanBadgeClass = getClanBadgeClass(item.nama_clan);
                 const formattedBiaya = '¥' + Number(item.biaya_sewa).toLocaleString('id-ID');
                 
-                // Render untuk Desktop (Tabel)
                 tbody.innerHTML += `
                     <tr>
                         <td>${index + 1}</td>
@@ -496,7 +532,6 @@
                     </tr>
                 `;
 
-                // Render untuk Mobile (Card View)
                 mobileContainer.innerHTML += `
                     <div class="mobile-item-card">
                         <div class="d-flex justify-content-between align-items-start mb-1">
