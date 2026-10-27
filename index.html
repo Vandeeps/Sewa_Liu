@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sewa Lapangan Sepak Bola Liu - Shizu Society</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23047857'/><text x='50% ' y='55%' dominant-baseline='middle' text-anchor='middle' fill='%23fef3c7' font-family='Cinzel, serif' font-size='65' font-weight='bold'>劉</text></svg>">
+    <!-- Favicon Huruf China (劉) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%23047857'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' fill='%23fef3c7' font-family='Arial, sans-serif' font-size='60' font-weight='bold'>劉</text></svg>">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -106,11 +107,13 @@
             border-color: #022c22;
         }
 
-        .badge.bg-dark {
-            background-color: var(--emerald-dark) !important;
-            color: var(--gold-light);
-            border: 1px solid var(--gold-accent);
-        }
+        /* Badge Custom untuk Clan */
+        .badge-non-clan { background-color: #374151; color: #f9fafb; border: 1px solid #9ca3af; }
+        .badge-yue { background-color: #06b6d4; color: #ffffff; font-weight: 600; } /* Cyan */
+        .badge-ren { background-color: #1f2937; color: #9ca3af; border: 1px solid #4b5563; } /* Hitam Abu */
+        .badge-zhang { background: linear-gradient(135deg, #b91c1c, #991b1b); color: #fde047; border: 1px solid #f59e0b; } /* Merah Emas */
+        .badge-jin { background-color: #6b21a8; color: #f3e8ff; } /* Ungu */
+        .badge-qiao { background: linear-gradient(135deg, #111827, #1f2937); color: #fbbf24; border: 1px solid #d97706; } /* Emas Hitam */
 
         /* Summary Cards */
         .bg-primary { background-color: var(--emerald-main) !important; }
@@ -243,9 +246,20 @@
 
             <!-- Daftar Data -->
             <div class="card p-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex flex-column flex-xxl-row justify-content-between align-items-xxl-center gap-3 mb-3">
                     <h4 class="text-secondary m-0 fs-5"><i class="fa-solid fa-table-list me-2"></i>Daftar Penyewa Lapangan</h4>
-                    <button class="btn btn-sm btn-outline-primary" onclick="loadDataFromCloud()"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
+                    
+                    <!-- Kotak Filter Rentang Tanggal & Refresh -->
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="d-flex align-items-center gap-1 bg-light p-1 rounded border">
+                            <span class="small text-muted px-1">Dari:</span>
+                            <input type="date" id="filterDari" class="form-control form-control-sm border-0 bg-transparent" onchange="renderTabel()">
+                            <span class="small text-muted px-1">s.d:</span>
+                            <input type="date" id="filterSampai" class="form-control form-control-sm border-0 bg-transparent" onchange="renderTabel()">
+                            <button class="btn btn-sm btn-outline-danger border-0" type="button" onclick="resetFilter()" title="Reset Filter"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadDataFromCloud()"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
+                    </div>
                 </div>
 
                 <!-- TAMPILAN DESKTOP (TABEL BIASA) -->
@@ -376,7 +390,7 @@
 
         async function loadDataFromCloud() {
             document.getElementById('loadingIndicator').classList.remove('d-none');
-            const { data, error } = await _supabase.from('sewa_lapangan').select('*').order('id', { ascending: true });
+            const { data, error } = await _supabase.from('sewa_lapangan').select('*').order('tanggal_sewa', { ascending: true });
             document.getElementById('loadingIndicator').classList.add('d-none');
 
             if (error) {
@@ -420,21 +434,49 @@
             loadDataFromCloud();
         });
 
+        function getClanBadgeClass(clanName) {
+            if (clanName.includes('Yue')) return 'badge-yue';
+            if (clanName.includes('Ren')) return 'badge-ren';
+            if (clanName.includes('Zhang')) return 'badge-zhang';
+            if (clanName.includes('Jin')) return 'badge-jin';
+            if (clanName.includes('Qiao')) return 'badge-qiao';
+            return 'badge-non-clan';
+        }
+
+        function resetFilter() {
+            document.getElementById('filterDari').value = '';
+            document.getElementById('filterSampai').value = '';
+            renderTabel();
+        }
+
         function renderTabel() {
             const tbody = document.getElementById('tabelSewaBody');
             const mobileContainer = document.getElementById('mobileSewaContainer');
+            const dariVal = document.getElementById('filterDari').value;
+            const sampaiVal = document.getElementById('filterSampai').value;
             
             tbody.innerHTML = '';
             mobileContainer.innerHTML = '';
 
-            if (dataSewa.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-muted">Belum ada data sewa lapangan.</td></tr>`;
-                mobileContainer.innerHTML = `<div class="text-center py-3 text-muted">Belum ada data sewa lapangan.</div>`;
+            // Filter data berdasarkan rentang tanggal
+            let filteredData = dataSewa;
+            if (dariVal && sampaiVal) {
+                filteredData = dataSewa.filter(item => item.tanggal_sewa >= dariVal && item.tanggal_sewa <= sampaiVal);
+            } else if (dariVal) {
+                filteredData = dataSewa.filter(item => item.tanggal_sewa >= dariVal);
+            } else if (sampaiVal) {
+                filteredData = dataSewa.filter(item => item.tanggal_sewa <= sampaiVal);
+            }
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-muted">Tidak ada data sewa untuk rentang tanggal tersebut.</td></tr>`;
+                mobileContainer.innerHTML = `<div class="text-center py-3 text-muted">Tidak ada data sewa untuk rentang tanggal tersebut.</div>`;
                 return;
             }
 
-            dataSewa.forEach((item, index) => {
+            filteredData.forEach((item, index) => {
                 const badgeClass = item.status_bayar === 'Sudah Bayar' ? 'bg-success' : 'bg-danger';
+                const clanBadgeClass = getClanBadgeClass(item.nama_clan);
                 const formattedBiaya = '¥' + Number(item.biaya_sewa).toLocaleString('id-ID');
                 
                 // Render untuk Desktop (Tabel)
@@ -442,7 +484,7 @@
                     <tr>
                         <td>${index + 1}</td>
                         <td>${item.nama}</td>
-                        <td><span class="badge bg-dark">${item.nama_clan}</span></td>
+                        <td><span class="badge ${clanBadgeClass}">${item.nama_clan}</span></td>
                         <td>${item.tanggal_sewa}</td>
                         <td>${item.jumlah_orang} Orang</td>
                         <td>${formattedBiaya}</td>
@@ -465,7 +507,7 @@
                             <span class="badge ${badgeClass}">${item.status_bayar}</span>
                         </div>
                         <div class="mb-2">
-                            <span class="badge bg-dark">${item.nama_clan}</span>
+                            <span class="badge ${clanBadgeClass}">${item.nama_clan}</span>
                         </div>
                         <div class="small text-muted mb-2">
                             <div><i class="fa-regular fa-calendar me-1"></i> Tgl: ${item.tanggal_sewa}</div>
