@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sewa Lapangan - Roleplay Sekolah Clan Liu</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cinzel & Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --emerald-dark: #064e3b;
+            --emerald-main: #047857;
+            --emerald-light: #ecfdf5;
+            --gold-accent: #d97706;
+            --gold-light: #fef3c7;
+        }
+
+        body { 
+            background-color: #f0fdf4; 
+            font-family: 'Poppins', sans-serif;
+            color: #1f2937;
+        }
+
+        h1, h3, h4, h5, .navbar-brand {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Navbar Chinese Emerald Theme */
+        .navbar {
+            background: linear-gradient(135deg, #022c22, var(--emerald-dark)) !important;
+            border-bottom: 3px solid var(--gold-accent);
+        }
+
+        .navbar-brand {
+            color: var(--gold-light) !important;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .nav-link {
+            color: #d1fae5 !important;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--gold-accent) !important;
+        }
+
+        /* Cards & Containers */
+        .card {
+            border: 1px solid #a7f3d0;
+            box-shadow: 0 4px 6px -1px rgba(6, 78, 59, 0.1);
+            border-radius: 0.75rem;
+        }
+
+        .card-header-chinese {
+            background: linear-gradient(135deg, var(--emerald-dark), var(--emerald-main));
+            color: var(--gold-light);
+            border-top-left-radius: 0.75rem !important;
+            border-top-right-radius: 0.75rem !important;
+            border-bottom: 2px solid var(--gold-accent);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--emerald-main);
+            border-color: var(--emerald-dark);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--emerald-dark);
+            border-color: #022c22;
+        }
+
+        .badge.bg-dark {
+            background-color: var(--emerald-dark) !important;
+            color: var(--gold-light);
+            border: 1px solid var(--gold-accent);
+        }
+
+        /* Tables */
+        .table-dark {
+            background-color: var(--emerald-dark) !important;
+            color: var(--gold-light);
+        }
+
+        /* Summary Cards */
+        .bg-primary { background-color: var(--emerald-main) !important; }
+        .bg-success { background-color: #059669 !important; }
+        .bg-danger { background-color: #991b1b !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fa-solid fa-dragon text-warning me-2"></i>劉 SEWA LAPANGAN RP SEKOLAH</a>
+            <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="switchTab('home', event)"><i class="fa-solid fa-scroll me-1"></i> Data Sewa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchTab('summary', event)"><i class="fa-solid fa-chart-pie me-1"></i> Total & Rangkuman</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-4">
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="alert alert-info text-center d-none">
+            <i class="fa-solid fa-spinner fa-spin me-2"></i> Menghubungkan ke Cloud Supabase...
+        </div>
+
+        <!-- TAB 1: DATA SEWA -->
+        <div id="tab-home" class="content-section">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header card-header-chinese py-3">
+                            <h4 class="m-0"><i class="fa-solid fa-pen-nib me-2"></i>Tambah Data Sewa Lapangan</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="formSewa">
+                                <input type="hidden" id="editId" value="">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold">Nama Penyewa</label>
+                                        <input type="text" class="form-control" id="nama" required placeholder="Contoh: Sensei / Kepsek / Murid">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold">Clan / Status</label>
+                                        <select class="form-select" id="namaClan" required>
+                                            <option value="" disabled selected>Pilih Status / Clan...</option>
+                                            <option value="Non-Clan (Kepsek/Staff/Tamu)">Non-Clan (Kepsek/Staff/Tamu)</option>
+                                            <option value="Yue Clan">Yue Clan</option>
+                                            <option value="Ren Clan">Ren Clan</option>
+                                            <option value="Qiao Clan">Qiao Clan</option>
+                                            <option value="Zhang Clan">Zhang Clan</option>
+                                            <option value="Jin Clan">Jin Clan</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">Tanggal</label>
+                                        <input type="date" class="form-control" id="tanggalSewa" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">Jumlah Orang</label>
+                                        <input type="number" class="form-control" id="jumlahOrang" min="1" value="2" required oninput="hitungBiaya()">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">Total Biaya (Yen)</label>
+                                        <input type="text" class="form-control bg-light fw-bold text-success" id="biayaSewaTampil" readonly value="¥10.000">
+                                        <input type="hidden" id="biayaSewa" value="10000">
+                                        <div class="form-text" style="font-size: 0.7rem;">Tarif: ¥5.000 / orang</div>
+                                    </div>
+                                </div>
+                                <div class="row g-3 mt-1">
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold">Status Bayar</label>
+                                        <select class="form-select" id="statusBayar">
+                                            <option value="Sudah Bayar">Sudah Bayar</option>
+                                            <option value="Belum Bayar">Belum Bayar</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary" id="btnSimpan"><i class="fa-solid fa-plus me-1"></i> Simpan Data</button>
+                                    <button type="button" class="btn btn-secondary d-none" id="btnBatal" onclick="resetForm()">Batal</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Data -->
+            <div class="card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="text-secondary m-0"><i class="fa-solid fa-table-list me-2"></i>Daftar Penyewa Lapangan (Online)</h4>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadDataFromCloud()"><i class="fa-solid fa-rotate me-1"></i> Refresh Data</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Penyewa</th>
+                                <th>Clan / Status</th>
+                                <th>Tanggal</th>
+                                <th>Jumlah Orang</th>
+                                <th>Biaya</th>
+                                <th>Status</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelSewaBody">
+                            <tr><td colspan="8" class="text-center py-3 text-muted">Memuat data dari server...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: TOTAL & RANGKUMAN -->
+        <div id="tab-summary" class="content-section d-none">
+            <h3 class="mb-4 text-dark"><i class="fa-solid fa-chart-line me-2"></i>Rangkuman & Total Keuangan</h3>
+            
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white p-3">
+                        <h6>Total Sesi Sewa</h6>
+                        <h3 id="sumTotalSesi">0</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white p-3">
+                        <h6>Total Pendapatan (Sudah Bayar)</h6>
+                        <h3 id="sumTotalPendapatan">¥0</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-danger text-white p-3">
+                        <h6>Total Belum Lunas (Piutang)</h6>
+                        <h3 id="sumTotalBelum">¥0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-3">
+                <h5 class="mb-3 text-secondary"><i class="fa-solid fa-receipt me-2"></i>Rangkuman per Clan / Status</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Clan / Status</th>
+                                <th>Total Sewa</th>
+                                <th>Sudah Bayar</th>
+                                <th>Belum Bayar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelClanBody">
+                            <tr><td colspan="4" class="text-center text-muted">Belum ada data ringkasan.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script Integrasi Supabase -->
+    <script>
+        // --- KONFIGURASI SUPABASE ANDA ---
+        const SUPABASE_URL = 'https://irobzhlfgjowgcoqlwuh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlyb2J6aGxmZ2pvd2djb3Fsd3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwNTc2MzAsImV4cCI6MjEwODYzMzYzMH0.TAhbakZtAda5CwUB61lCzQMRcSP6PoiOM0sbkOzuh70';
+        // ---------------------------------
+
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let dataSewa = [];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggalSewa').value = today;
+            hitungBiaya();
+            loadDataFromCloud();
+        });
+
+        function hitungBiaya() {
+            const jumlahOrang = Number(document.getElementById('jumlahOrang').value) || 0;
+            const hargaPerOrang = 5000;
+            const total = jumlahOrang * hargaPerOrang;
+
+            document.getElementById('biayaSewa').value = total;
+            document.getElementById('biayaSewaTampil').value = '¥' + total.toLocaleString('id-ID');
+        }
+
+        function switchTab(tab, event) {
+            document.querySelectorAll('.content-section').forEach(el => el.classList.add('d-none'));
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+
+            if (tab === 'home') {
+                document.getElementById('tab-home').classList.remove('d-none');
+                event.currentTarget.classList.add('active');
+                loadDataFromCloud();
+            } else if (tab === 'summary') {
+                document.getElementById('tab-summary').classList.remove('d-none');
+                event.currentTarget.classList.add('active');
+                renderSummary();
+            }
+        }
+
+        async function loadDataFromCloud() {
+            document.getElementById('loadingIndicator').classList.remove('d-none');
+            const { data, error } = await _supabase.from('sewa_lapangan').select('*').order('id', { ascending: true });
+            document.getElementById('loadingIndicator').classList.add('d-none');
+
+            if (error) {
+                alert('Gagal memuat data dari server: ' + error.message);
+                return;
+            }
+
+            dataSewa = data || [];
+            renderTabel();
+        }
+
+        document.getElementById('formSewa').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const nama = document.getElementById('nama').value;
+            const nama_clan = document.getElementById('namaClan').value;
+            const tanggal_sewa = document.getElementById('tanggalSewa').value;
+            const jumlah_orang = Number(document.getElementById('jumlahOrang').value);
+            const biaya_sewa = Number(document.getElementById('biayaSewa').value);
+            const status_bayar = document.getElementById('statusBayar').value;
+
+            const payload = { nama, nama_clan, tanggal_sewa, jumlah_orang, biaya_sewa, status_bayar };
+
+            const btnSimpan = document.getElementById('btnSimpan');
+            btnSimpan.disabled = true;
+
+            if (id === '') {
+                const { error } = await _supabase.from('sewa_lapangan').insert([payload]);
+                if (error) alert('Gagal menyimpan: ' + error.message);
+            } else {
+                const { error } = await _supabase.from('sewa_lapangan').update(payload).eq('id', id);
+                if (error) alert('Gagal memperbarui: ' + error.message);
+                resetForm();
+            }
+
+            btnSimpan.disabled = false;
+            this.reset();
+            document.getElementById('tanggalSewa').value = new Date().toISOString().split('T')[0];
+            document.getElementById('jumlahOrang').value = 2;
+            hitungBiaya();
+            loadDataFromCloud();
+        });
+
+        function renderTabel() {
+            const tbody = document.getElementById('tabelSewaBody');
+            tbody.innerHTML = '';
+
+            if (dataSewa.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-muted">Belum ada data sewa lapangan.</td></tr>`;
+                return;
+            }
+
+            dataSewa.forEach((item, index) => {
+                const badgeClass = item.status_bayar === 'Sudah Bayar' ? 'bg-success' : 'bg-danger';
+                const formattedBiaya = '¥' + Number(item.biaya_sewa).toLocaleString('id-ID');
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.nama}</td>
+                        <td><span class="badge bg-dark">${item.nama_clan}</span></td>
+                        <td>${item.tanggal_sewa}</td>
+                        <td>${item.jumlah_orang} Orang</td>
+                        <td>${formattedBiaya}</td>
+                        <td><span class="badge ${badgeClass}">${item.status_bayar}</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-warning me-1" onclick="editData('${item.id}', '${item.nama}', '${item.nama_clan}', '${item.tanggal_sewa}', ${item.jumlah_orang}, ${item.biaya_sewa}, '${item.status_bayar}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="hapusData('${item.id}')"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function editData(id, nama, nama_clan, tanggal_sewa, jumlah_orang, biaya_sewa, status_bayar) {
+            document.getElementById('editId').value = id;
+            document.getElementById('nama').value = nama;
+            document.getElementById('namaClan').value = nama_clan;
+            document.getElementById('tanggalSewa').value = tanggal_sewa;
+            document.getElementById('jumlahOrang').value = jumlah_orang;
+            document.getElementById('biayaSewa').value = biaya_sewa;
+            document.getElementById('biayaSewaTampil').value = '¥' + Number(biaya_sewa).toLocaleString('id-ID');
+            document.getElementById('statusBayar').value = status_bayar;
+
+            document.getElementById('btnSimpan').innerHTML = '<i class="fa-solid fa-save me-1"></i> Update Data';
+            document.getElementById('btnBatal').classList.remove('d-none');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('formSewa').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('tanggalSewa').value = new Date().toISOString().split('T')[0];
+            document.getElementById('jumlahOrang').value = 2;
+            hitungBiaya();
+            document.getElementById('btnSimpan').innerHTML = '<i class="fa-solid fa-plus me-1"></i> Simpan Data';
+            document.getElementById('btnBatal').classList.add('d-none');
+        }
+
+        async function hapusData(id) {
+            if (confirm('Yakin ingin menghapus data ini dari server?')) {
+                const { error } = await _supabase.from('sewa_lapangan').delete().eq('id', id);
+                if (error) {
+                    alert('Gagal menghapus: ' + error.message);
+                } else {
+                    loadDataFromCloud();
+                }
+            }
+        }
+
+        function renderSummary() {
+            let totalSesi = dataSewa.length;
+            let totalPendapatan = 0;
+            let totalBelum = 0;
+            let clanSummary = {};
+
+            dataSewa.forEach(item => {
+                const biaya = Number(item.biaya_sewa);
+                if (item.status_bayar === 'Sudah Bayar') {
+                    totalPendapatan += biaya;
+                } else {
+                    totalBelum += biaya;
+                }
+
+                if (!clanSummary[item.nama_clan]) {
+                    clanSummary[item.nama_clan] = { total: 0, sudah: 0, belum: 0 };
+                }
+                clanSummary[item.nama_clan].total += 1;
+                if (item.status_bayar === 'Sudah Bayar') {
+                    clanSummary[item.nama_clan].sudah += biaya;
+                } else {
+                    clanSummary[item.nama_clan].belum += biaya;
+                }
+            });
+
+            const formatYen = (val) => '¥' + Number(val).toLocaleString('id-ID');
+
+            document.getElementById('sumTotalSesi').innerText = totalSesi;
+            document.getElementById('sumTotalPendapatan').innerText = formatYen(totalPendapatan);
+            document.getElementById('sumTotalBelum').innerText = formatYen(totalBelum);
+
+            const tabelClanBody = document.getElementById('tabelClanBody');
+            tabelClanBody.innerHTML = '';
+
+            const keys = Object.keys(clanSummary);
+            if (keys.length === 0) {
+                tabelClanBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada data ringkasan.</td></tr>`;
+                return;
+            }
+
+            keys.forEach(clan => {
+                const c = clanSummary[clan];
+                tabelClanBody.innerHTML += `
+                    <tr>
+                        <td><strong>${clan}</strong></td>
+                        <td>${c.total} Sesi</td>
+                        <td class="text-success">${formatYen(c.sudah)}</td>
+                        <td class="text-danger">${formatYen(c.belum)}</td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
