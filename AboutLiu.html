@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struktur Clan Liu - Shizu Society</title>
+    <!-- Favicon Huruf China (劉) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%23047857'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' fill='%23fef3c7' font-family='Arial, sans-serif' font-size='60' font-weight='bold'>劉</text></svg>">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cinzel & Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --emerald-dark: #064e3b;
+            --emerald-main: #047857;
+            --emerald-light: #ecfdf5;
+            --gold-accent: #d97706;
+            --gold-light: #fef3c7;
+        }
+
+        body { 
+            background-color: #f0fdf4; 
+            font-family: 'Poppins', sans-serif;
+            color: #1f2937;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            flex: 1;
+        }
+
+        h1, h3, h4, h5, .navbar-brand {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Navbar Chinese Emerald Theme */
+        .navbar {
+            background: linear-gradient(135deg, #022c22, var(--emerald-dark)) !important;
+            border-bottom: 3px solid var(--gold-accent);
+        }
+
+        .navbar-brand {
+            color: var(--gold-light) !important;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            white-space: normal !important;
+            line-height: 1.2;
+        }
+
+        @media (min-width: 768px) {
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+        }
+
+        .chinese-logo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            width: 36px;
+            height: 36px;
+            background-color: var(--emerald-main);
+            color: var(--gold-light);
+            border: 2px solid var(--gold-accent);
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .nav-link {
+            color: #d1fae5 !important;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--gold-accent) !important;
+        }
+
+        /* Cards & Containers */
+        .card {
+            border: 1px solid #a7f3d0;
+            box-shadow: 0 4px 6px -1px rgba(6, 78, 59, 0.1);
+            border-radius: 0.75rem;
+        }
+
+        .card-header-chinese {
+            background: linear-gradient(135deg, var(--emerald-dark), var(--emerald-main));
+            color: var(--gold-light);
+            border-top-left-radius: 0.75rem !important;
+            border-top-right-radius: 0.75rem !important;
+            border-bottom: 2px solid var(--gold-accent);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--emerald-main);
+            border-color: var(--emerald-dark);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--emerald-dark);
+            border-color: #022c22;
+        }
+
+        .badge-jabatan {
+            background-color: var(--gold-light);
+            color: var(--emerald-dark);
+            border: 1px solid var(--gold-accent);
+            font-weight: 600;
+        }
+
+        /* Footer Copyright */
+        footer {
+            background: #022c22;
+            color: #d1fae5;
+            border-top: 2px solid var(--gold-accent);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg shadow-sm py-2">
+        <div class="container">
+            <a class="navbar-brand me-2" href="index.html">
+                <span class="chinese-logo-icon me-2 flex-shrink-0">劉</span> 
+                <span>SEWA LAPANGAN SEPAK BOLA LIU - SHIZU SOCIETY</span>
+            </a>
+            <button class="navbar-toggler bg-light ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end mt-2 mt-lg-0" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html"><i class="fa-solid fa-scroll me-1"></i> Data Sewa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="AboutLiu.html"><i class="fa-solid fa-users-gear me-1"></i> Struktur Clan Liu</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-4 main-container">
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="alert alert-info text-center d-none">
+            <i class="fa-solid fa-spinner fa-spin me-2"></i> Menghubungkan ke Cloud Supabase...
+        </div>
+
+        <!-- Form Input Struktur Clan -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header card-header-chinese py-3">
+                        <h4 class="m-0 fs-5"><i class="fa-solid fa-user-plus me-2"></i>Tambah Anggota Struktur Clan Liu</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="formStruktur">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-5 col-12">
+                                    <label for="namaAnggota" class="form-label fw-semibold">Nama Anggota</label>
+                                    <input type="text" class="form-control" id="namaAnggota" required placeholder="Masukkan nama anggota">
+                                </div>
+                                <div class="col-md-5 col-12">
+                                    <label for="jabatanAnggota" class="form-label fw-semibold">Jabatan</label>
+                                    <input type="text" class="form-control" id="jabatanAnggota" required placeholder="Contoh: Ketua, Wakil, Bendahara">
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <button type="submit" class="btn btn-primary w-100" id="btnTambahStruktur">
+                                        <i class="fa-solid fa-plus me-1"></i> Tambah
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Struktur Clan -->
+        <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-secondary m-0 fs-5"><i class="fa-solid fa-sitemap me-2"></i>Daftar Struktur Clan Liu</h4>
+                <button class="btn btn-sm btn-outline-primary" onclick="loadStruktur()">
+                    <i class="fa-solid fa-rotate me-1"></i> Refresh
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 70px;">No</th>
+                            <th>Nama Anggota</th>
+                            <th>Jabatan</th>
+                            <th class="text-center" style="width: 120px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelStrukturBody">
+                        <tr>
+                            <td colspan="4" class="text-center py-3 text-muted">Memuat data struktur...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer Copyright -->
+    <footer class="text-center py-3 mt-auto">
+        <div class="container">
+            <p class="m-0">&copy; 2026 <strong>Vandeeps</strong>. Powered by <strong>Vercel & Supabase</strong>.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script Integrasi Supabase -->
+    <script>
+        const SUPABASE_URL = 'https://irobzhlfgjowgcoqlwuh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlyb2J6aGxmZ2pvd2djb3Fsd3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwNTc2MzAsImV4cCI6MjEwODYzMzYzMH0.TAhbakZtAda5CwUB61lCzQMRcSP6PoiOM0sbkOzuh70';
+
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadStruktur();
+        });
+
+        async function loadStruktur() {
+            const loading = document.getElementById('loadingIndicator');
+            const tbody = document.getElementById('tabelStrukturBody');
+
+            loading.classList.remove('d-none');
+            const { data, error } = await _supabase
+                .from('struktur_clan')
+                .select('id, nama_anggota, jabatan')
+                .order('id', { ascending: true });
+            loading.classList.add('d-none');
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-danger">Gagal memuat data: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-muted">Belum ada data struktur Clan Liu.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach((item, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td class="fw-semibold">${escapeHtml(item.nama_anggota)}</td>
+                        <td><span class="badge badge-jabatan px-3 py-2">${escapeHtml(item.jabatan)}</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-danger" onclick="hapusStruktur(${item.id})" title="Hapus">
+                                <i class="fa-solid fa-trash me-1"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('formStruktur').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const namaInput = document.getElementById('namaAnggota');
+            const jabatanInput = document.getElementById('jabatanAnggota');
+            const btn = document.getElementById('btnTambahStruktur');
+
+            const nama_anggota = namaInput.value.trim();
+            const jabatan = jabatanInput.value.trim();
+
+            if (!nama_anggota || !jabatan) return;
+
+            btn.disabled = true;
+            const { error } = await _supabase
+                .from('struktur_clan')
+                .insert([{ nama_anggota, jabatan }]);
+            btn.disabled = false;
+
+            if (error) {
+                alert('Gagal menambah data: ' + error.message);
+                return;
+            }
+
+            namaInput.value = '';
+            jabatanInput.value = '';
+            namaInput.focus();
+            loadStruktur();
+        });
+
+        async function hapusStruktur(id) {
+            if (!confirm('Yakin ingin menghapus anggota ini dari struktur Clan Liu?')) return;
+
+            const { error } = await _supabase
+                .from('struktur_clan')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                alert('Gagal menghapus data: ' + error.message);
+                return;
+            }
+
+            loadStruktur();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
