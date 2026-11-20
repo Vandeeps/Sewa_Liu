@@ -90,7 +90,7 @@
         }
 
         /* Cards & Containers */
-        .card {
+        .card, .modal-content {
             border: 1px solid #a7f3d0;
             box-shadow: 0 4px 6px -1px rgba(6, 78, 59, 0.1);
             border-radius: 0.75rem;
@@ -171,22 +171,21 @@
             <i class="fa-solid fa-spinner fa-spin me-2"></i> Menghubungkan ke Cloud Supabase...
         </div>
 
-        <!-- Form Input & Edit Struktur Clan -->
+        <!-- Form Tambah Struktur Clan -->
         <div class="row mb-4">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header card-header-chinese py-3">
-                        <h4 class="m-0 fs-5" id="judulFormStruktur"><i class="fa-solid fa-user-plus me-2"></i>Tambah Anggota Struktur Clan Liu</h4>
+                        <h4 class="m-0 fs-5"><i class="fa-solid fa-user-plus me-2"></i>Tambah Anggota Struktur Clan Liu</h4>
                     </div>
                     <div class="card-body">
-                        <form id="formStruktur">
-                            <input type="hidden" id="editStrukturId" value="">
+                        <form id="formTambahStruktur">
                             <div class="row g-3 align-items-end">
                                 <div class="col-md-5 col-12">
                                     <label for="namaAnggota" class="form-label fw-semibold">Nama Anggota</label>
                                     <input type="text" class="form-control" id="namaAnggota" required placeholder="Masukkan nama anggota">
                                 </div>
-                                <div class="col-md-4 col-12">
+                                <div class="col-md-5 col-12">
                                     <label for="jabatanAnggota" class="form-label fw-semibold">Jabatan</label>
                                     <select class="form-select" id="jabatanAnggota" required>
                                         <option value="Anggota" selected>Anggota</option>
@@ -197,12 +196,9 @@
                                         <option value="Sekretaris">Sekretaris</option>
                                     </select>
                                 </div>
-                                <div class="col-md-3 col-12 d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary flex-grow-1" id="btnSimpanStruktur">
+                                <div class="col-md-2 col-12">
+                                    <button type="submit" class="btn btn-primary w-100" id="btnTambahStruktur">
                                         <i class="fa-solid fa-plus me-1"></i> Simpan
-                                    </button>
-                                    <button type="button" class="btn btn-secondary d-none" id="btnBatalStruktur" onclick="resetFormStruktur()">
-                                        Batal
                                     </button>
                                 </div>
                             </div>
@@ -228,7 +224,7 @@
                             <th style="width: 70px;">No</th>
                             <th>Nama Anggota</th>
                             <th>Jabatan</th>
-                            <th class="text-center" style="width: 170px;">Aksi</th>
+                            <th class="text-center" style="width: 150px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tabelStrukturBody">
@@ -240,6 +236,44 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- MODAL POP-UP EDIT DATA -->
+    <div class="modal fade" id="modalEditStruktur" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header card-header-chinese">
+                    <h5 class="modal-title fs-5" id="modalEditLabel"><i class="fa-solid fa-user-pen me-2"></i>Edit Anggota Clan Liu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formEditStruktur">
+                    <div class="modal-body">
+                        <input type="hidden" id="editId">
+                        <div class="mb-3">
+                            <label for="editNamaAnggota" class="form-label fw-semibold">Nama Anggota</label>
+                            <input type="text" class="form-control" id="editNamaAnggota" required placeholder="Masukkan nama anggota">
+                        </div>
+                        <div class="mb-2">
+                            <label for="editJabatanAnggota" class="form-label fw-semibold">Jabatan</label>
+                            <select class="form-select" id="editJabatanAnggota" required>
+                                <option value="Anggota">Anggota</option>
+                                <option value="Founder">Founder</option>
+                                <option value="Leader">Leader</option>
+                                <option value="CO Leader">CO Leader</option>
+                                <option value="Bendahara">Bendahara</option>
+                                <option value="Sekretaris">Sekretaris</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="btnUpdateStruktur">
+                            <i class="fa-solid fa-save me-1"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Footer Copyright -->
@@ -258,8 +292,11 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlyb2J6aGxmZ2pvd2djb3Fsd3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwNTc2MzAsImV4cCI6MjEwODYzMzYzMH0.TAhbakZtAda5CwUB61lCzQMRcSP6PoiOM0sbkOzuh70';
 
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let dataStruktur = [];
+        let modalEditInstance = null;
 
         document.addEventListener('DOMContentLoaded', function () {
+            modalEditInstance = new bootstrap.Modal(document.getElementById('modalEditStruktur'));
             loadStruktur();
         });
 
@@ -279,13 +316,15 @@
                 return;
             }
 
-            if (!data || data.length === 0) {
+            dataStruktur = data || [];
+
+            if (dataStruktur.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-muted">Belum ada data struktur Clan Liu.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = '';
-            data.forEach((item, index) => {
+            dataStruktur.forEach((item, index) => {
                 const badgeClass = item.jabatan === 'Anggota' ? 'badge-anggota' : 'badge-jabatan';
                 tbody.innerHTML += `
                     <tr>
@@ -293,10 +332,10 @@
                         <td class="fw-semibold">${escapeHtml(item.nama_anggota)}</td>
                         <td><span class="badge ${badgeClass} px-3 py-2">${escapeHtml(item.jabatan)}</span></td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-warning me-1" onclick="mulaiEditStruktur(${item.id}, ${JSON.stringify(item.nama_anggota)}, ${JSON.stringify(item.jabatan)})" title="Edit">
+                            <button class="btn btn-sm btn-warning me-1" onclick="bukaModalEdit(${item.id})" title="Edit">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="hapusStruktur(${item.id})" title="Hapus">
+                            <button class="btn btn-sm btn-danger" onclick="hapusData(${item.id})" title="Hapus">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </td>
@@ -305,13 +344,13 @@
             });
         }
 
-        document.getElementById('formStruktur').addEventListener('submit', async function (e) {
+        // Tambah Data Baru
+        document.getElementById('formTambahStruktur').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const id = document.getElementById('editStrukturId').value;
             const namaInput = document.getElementById('namaAnggota');
             const jabatanInput = document.getElementById('jabatanAnggota');
-            const btn = document.getElementById('btnSimpanStruktur');
+            const btn = document.getElementById('btnTambahStruktur');
 
             const nama_anggota = namaInput.value.trim();
             const jabatan = jabatanInput.value;
@@ -319,29 +358,14 @@
             if (!nama_anggota || !jabatan) return;
 
             btn.disabled = true;
+            const { error } = await _supabase
+                .from('struktur_clan')
+                .insert([{ nama_anggota, jabatan }]);
+            btn.disabled = false;
 
-            if (id === '') {
-                const { error } = await _supabase
-                    .from('struktur_clan')
-                    .insert([{ nama_anggota, jabatan }]);
-                btn.disabled = false;
-
-                if (error) {
-                    alert('Gagal menambah data: ' + error.message);
-                    return;
-                }
-            } else {
-                const { error } = await _supabase
-                    .from('struktur_clan')
-                    .update({ nama_anggota, jabatan })
-                    .eq('id', id);
-                btn.disabled = false;
-
-                if (error) {
-                    alert('Gagal memperbarui data: ' + error.message);
-                    return;
-                }
-                resetFormStruktur();
+            if (error) {
+                alert('Gagal menyimpan: ' + error.message);
+                return;
             }
 
             namaInput.value = '';
@@ -350,47 +374,62 @@
             loadStruktur();
         });
 
-        function mulaiEditStruktur(id, nama_anggota, jabatan) {
-            document.getElementById('editStrukturId').value = id;
-            document.getElementById('namaAnggota').value = nama_anggota;
+        // Buka Modal Pop-Up Edit
+        function bukaModalEdit(id) {
+            const anggota = dataStruktur.find(item => item.id === id);
+            if (!anggota) return;
 
-            const selectJabatan = document.getElementById('jabatanAnggota');
-            const opsiTersedia = Array.from(selectJabatan.options).some(opt => opt.value === jabatan);
-            selectJabatan.value = opsiTersedia ? jabatan : 'Anggota';
+            document.getElementById('editId').value = anggota.id;
+            document.getElementById('editNamaAnggota').value = anggota.nama_anggota;
 
-            document.getElementById('judulFormStruktur').innerHTML = '<i class="fa-solid fa-user-pen me-2"></i>Edit Anggota Struktur Clan Liu';
-            document.getElementById('btnSimpanStruktur').innerHTML = '<i class="fa-solid fa-save me-1"></i> Update';
-            document.getElementById('btnBatalStruktur').classList.remove('d-none');
+            const selectJabatan = document.getElementById('editJabatanAnggota');
+            const opsiAda = Array.from(selectJabatan.options).some(opt => opt.value === anggota.jabatan);
+            selectJabatan.value = opsiAda ? anggota.jabatan : 'Anggota';
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            modalEditInstance.show();
         }
 
-        function resetFormStruktur() {
-            document.getElementById('editStrukturId').value = '';
-            document.getElementById('namaAnggota').value = '';
-            document.getElementById('jabatanAnggota').value = 'Anggota';
-            document.getElementById('judulFormStruktur').innerHTML = '<i class="fa-solid fa-user-plus me-2"></i>Tambah Anggota Struktur Clan Liu';
-            document.getElementById('btnSimpanStruktur').innerHTML = '<i class="fa-solid fa-plus me-1"></i> Simpan';
-            document.getElementById('btnBatalStruktur').classList.add('d-none');
-        }
+        // Simpan Perubahan dari Modal Edit
+        document.getElementById('formEditStruktur').addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-        async function hapusStruktur(id) {
-            if (!confirm('Yakin ingin menghapus anggota ini dari struktur Clan Liu?')) return;
+            const id = document.getElementById('editId').value;
+            const nama_anggota = document.getElementById('editNamaAnggota').value.trim();
+            const jabatan = document.getElementById('editJabatanAnggota').value;
+            const btn = document.getElementById('btnUpdateStruktur');
 
+            if (!id || !nama_anggota || !jabatan) return;
+
+            btn.disabled = true;
             const { error } = await _supabase
                 .from('struktur_clan')
-                .delete()
+                .update({ nama_anggota, jabatan })
                 .eq('id', id);
+            btn.disabled = false;
 
             if (error) {
-                alert('Gagal menghapus data: ' + error.message);
+                alert('Gagal memperbarui: ' + error.message);
                 return;
             }
 
-            if (document.getElementById('editStrukturId').value == id) {
-                resetFormStruktur();
-            }
+            modalEditInstance.hide();
             loadStruktur();
+        });
+
+        // Hapus Data dengan Pop-up Warning sama seperti index.html
+        async function hapusData(id) {
+            if (confirm('Yakin ingin menghapus data ini dari server?')) {
+                const { error } = await _supabase
+                    .from('struktur_clan')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert('Gagal menghapus: ' + error.message);
+                } else {
+                    loadStruktur();
+                }
+            }
         }
 
         function escapeHtml(text) {
